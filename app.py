@@ -1,8 +1,14 @@
 import os
 from openai import OpenAI
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
+CORS(app, origins=["https://ai-agent-app-1.onrender.com"])
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/inquiry", methods=["POST"])
@@ -19,8 +25,9 @@ def inquiry():
             ]
         )
         answer = response.choices[0].message.content
-        return jsonify({"answer": answer})
+        return jsonify({"answer": answer}), 200, {'Content-Type': 'application/json; charset=utf-8'}
     except Exception as e:
+        app.logger.error(f"Error during OpenAI API call: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
