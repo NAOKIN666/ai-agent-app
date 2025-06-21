@@ -11,6 +11,10 @@ CORS(app, origins=["https://ai-agent-app-1.onrender.com"])
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# FAQ データをファイルから読み込み
+with open("faq_data.txt", encoding="utf-8") as f:
+    faq_data = f.read()
+
 @app.route("/inquiry", methods=["POST"])
 def inquiry():
     user_message = request.json.get("message", "")
@@ -20,7 +24,7 @@ def inquiry():
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "あなたはカスタマーサポートの担当者です。丁寧に問い合わせに答えてください。"},
+                {"role": "system", "content": f"あなたはカスタマーサポート担当者です。以下のFAQを参考に正確に回答してください。\n\n{faq_data}"},
                 {"role": "user", "content": user_message}
             ]
         )
